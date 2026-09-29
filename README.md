@@ -1,5 +1,75 @@
 # D365 F&O Task Recorder Enhance
 
+A standalone browser extension (Manifest V3, works on both Edge and Chrome) that enhances the
+screenshot capability of **Task Recorder** in Dynamics 365 Finance & Operations. The core idea is
+based on analysis of the D365 F&O client's screenshot hook, reimplemented from scratch:
+
+> While recording each step, D365 F&O Task Recorder dispatches a custom `"screenshot"` event on the
+> page `document`. This extension listens for that event and delegates to the browser extension API
+> `chrome.tabs.captureVisibleTab` to capture the currently visible tab, while managing screenshot
+> history, clipboard copy, and bulk download.
+
+## Features
+- **Handshake marker**: injects a hidden `<div id="screenshotExtensionIsInstalled">` element into the
+  page so D365 F&O Task Recorder can detect that a "screenshot extension" is installed, which enables
+  the "Capture screenshots" option in the recording dialog and makes it dispatch screenshot events
+  (a `MutationObserver` re-inserts the marker automatically after SPA partial page refreshes)
+- **Auto capture**: listens for the page's `screenshot` event and automatically captures a screenshot
+  on every recorded step (toggle available in the popup), and relays the screenshot back to the page
+  via `window.postMessage` for D365 F&O's own embedding logic (e.g. Word export)
+- **Hides control UI**: temporarily hides this extension's own floating button/toast before capturing,
+  and automatically crops out D365 F&O's native Task Recorder side panel from the resulting image
+  (see "Why is part of the screenshot cropped out?" below), restoring the UI immediately afterward
+- **Manual capture**: a floating button 📷 in the bottom-right corner of the page (hidden by default),
+  or a keyboard shortcut (default `Ctrl+Shift+Y`, customizable via the popup's "Change" button which
+  opens the browser's shortcut settings page)
+- **Throttling & retry**: `captureVisibleTab` is officially rate-limited to ~2 calls/sec; a built-in
+  throttled queue with exponential backoff retry avoids dropped screenshots from
+  `MAX_CAPTURE_VISIBLE_TAB` errors
+- **History**: a thumbnail list showing trigger source (Task Recorder / manual) and timestamp; the
+  maximum number of entries kept is configurable in the popup (default 30)
+- **One-click copy**: writes the screenshot PNG to the system clipboard via an offscreen document, so
+  it can be pasted directly into Word / Azure DevOps / Teams
+- **Bulk/single download**: exports to the `Downloads/D365TaskRecorder/` folder, with filenames that
+  automatically include the menu item and timestamp
+- **On-page toast notifications**: a corner toast reports capture success/failure without interrupting
+  the user's workflow
+
+## File structure
+| File | Purpose |
+|---|---|
+| `manifest.json` | Extension configuration (permissions, content scripts, shortcuts) |
+| `content.js` | Injected into D365 F&O pages: listens for the `screenshot` event, floating button, toast |
+| `background.js` | Service worker: throttled/retried capture, history management, download/copy routing |
+| `offscreen.html/js` | Offscreen document: performs the clipboard write (service workers have no DOM access) |
+| `popup.html/js` | Popup UI: toggles, history list, copy/download/clear |
+| `icons/` | Extension icons (16/48/128) |
+
+## Install & test
+1. In Edge, go to `edge://extensions/` and enable **Developer mode**
+2. Click **Load unpacked** → select the `D365-TaskRecorder-Enhance` folder
+3. Open a D365 F&O environment, start a Task Recorder recording — each recorded step is captured
+   automatically
+4. Click the toolbar extension icon to view the screenshot history, copy, or download
+
+## Notes
+- `host_permissions` is currently set to `<all_urls>` (rather than limited to known D365 F&O domains)
+  to avoid capture failures when different tenants use different domain names
+- History entries are stored as Base64 in `chrome.storage.local`; the limit defaults to 30 entries
+  (configurable in the popup) and the oldest entries are automatically pruned beyond the limit to avoid
+  hitting storage quotas — download/export anything you need to keep long-term
+- If a given D365 F&O page/version doesn't dispatch the `screenshot` custom event (behavior may vary
+  by version or customization), use the manual capture button or shortcut instead
+- The approach for excluding the Task Recorder panel is inspired by Microsoft's own D365 Power Hub
+  extension: D365 F&O renders Task Recorder (and other flyout panels) inside a fixed
+  `<div id="asidePane">` container. After capturing, the content script uses a canvas to crop out the
+  region matching that container's width and stretch the remainder to fill the frame, instead of
+  relying on CSS-based hiding. If the panel still appears in captures in some environment, please
+  inspect the page with F12 to confirm whether it actually uses `id="asidePane"`, and report the actual
+  id/structure so the `cropAsidePane` logic in `content.js` can be adjusted
+
+# D365 F&O Task Recorder Enhance
+
 一个独立的浏览器扩展(Manifest V3, Edge/Chrome 通用),用于增强 Dynamics 365 Finance & Operations
 的 **Task Recorder** 截图能力。核心思路来自对 D365 F&O 客户端截图钩子的分析,并用全新代码重新实现:
 
