@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>D365 F&O Task Recorder Enhance</title>
+<style>
+  body {
+    width: 340px;
+    max-height: 480px;
+    font-family: "Segoe UI", sans-serif;
+    margin: 0;
+    padding: 14px;
+    box-sizing: border-box;
+  }
+  h1 {
+    font-size: 15px;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .switch { position: relative; width: 38px; height: 20px; }
+  .switch input { display: none; }
+  .slider {
+    position: absolute; inset: 0; background: #ccc; border-radius: 20px; cursor: pointer; transition: .2s;
+  }
+  .slider::before {
+    content: ""; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px;
+    background: #fff; border-radius: 50%; transition: .2s;
+  }
+  input:checked + .slider { background: #0078d4; }
+  input:checked + .slider::before { transform: translateX(18px); }
+
+  .actions { display: flex; gap: 6px; margin-bottom: 10px; }
+  button {
+    flex: 1; padding: 6px 4px; border: none; border-radius: 6px;
+    background: #eef2f6; cursor: pointer; font-size: 12px;
+  }
+  button:hover { background: #dde5ec; }
+  button.primary { background: #0078d4; color: #fff; }
+  button.primary:hover { background: #005fa3; }
+  button.danger:hover { background: #f8d7da; }
+
+  .history { max-height: 260px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 8px; }
+  .item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 4px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .item img {
+    width: 56px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  .item .meta { flex: 1; min-width: 0; }
+  .item .name { font-size: 11px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .time { font-size: 10px; color: #888; }
+  .item .btns { display: flex; gap: 4px; }
+  .item .btns button { flex: none; padding: 3px 6px; font-size: 11px; }
+  .empty { text-align: center; color: #999; font-size: 12px; padding: 20px 0; }
+  .shortcut-row { font-size: 12px; color: #444; }
+  .shortcut-row b { color: #0078d4; }
+  #configShortcut { flex: none; width: auto; padding: 4px 8px; font-size: 11px; }
+</style>
+</head>
+<body>
+  <h1>📷 D365 F&O Task Recorder Enhance</h1>
+
+  <div class="row">
+    <span>Task Recorder 自动截图</span>
+    <label class="switch">
+      <input type="checkbox" id="autoToggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="row">
+    <span>显示右下角手动截图按钮</span>
+    <label class="switch">
+      <input type="checkbox" id="fabToggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="actions">
+    <button id="manualCapture">立即截图</button>
+    <button id="downloadAll">全部下载</button>
+    <button id="clearAll" class="danger">清空历史</button>
+  </div>
+
+  <div class="row shortcut-row">
+    <span>立即截图快捷键:<b id="shortcutValue">未设置</b></span>
+    <button id="configShortcut">⌨️ 修改</button>
+  </div>
+
+  <div class="row shortcut-row">
+    <span>历史记录上限(条)</span>
+    <input type="number" id="maxHistoryInput" min="1" max="500" style="width:56px;padding:2px 4px;" />
+  </div>
+
+  <div id="history" class="history"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

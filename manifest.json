@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "D365 F&O Task Recorder Enhance",
+  "version": "1.0.114",
+  "description": "增强 D365 F&O (Finance & Operations) Task Recorder:自动截图、剪贴板复制、批量下载与本地历史记录。",
+  "default_locale": "en",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "offscreen",
+    "downloads",
+    "notifications"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "D365 F&O Task Recorder Enhance"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "manual-capture": {
+      "suggested_key": { "default": "Ctrl+Shift+Y" },
+      "description": "立即截取当前 D365 F&O 页面(不依赖 Task Recorder 事件)"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "D365 F&O Task Recorder Enhance",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "增强 D365 F&O (Finance & Operations) Task Recorder:自动截图、剪贴板复制、批量下载与本地历史记录。",
+    "description": "Extension description"
+  }
+}

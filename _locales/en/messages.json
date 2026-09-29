@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "D365 F&O Task Recorder Enhance",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Enhance D365 F&O (Finance & Operations) Task Recorder with auto screenshot, clipboard copy, batch download and local history.",
+    "description": "Extension description"
+  }
+}
